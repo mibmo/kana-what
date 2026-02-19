@@ -6,3 +6,6 @@ result
 
 # trunk
 /dist
+
+# node
+/node_modules
