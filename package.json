@@ -7,5 +7,5 @@
     "postcss-cli": "^11.0.1",
     "postcss-normalize": "^13.0.1"
   },
-  "browserslist": "last 3 versions"
+  "browserslist": "defaults"
 }
