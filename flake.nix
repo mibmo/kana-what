@@ -48,7 +48,6 @@
           packages = with pkgs; [
             bacon
             binaryen
-            cargo-leptos
             cargo-sort
             leptosfmt
             nodejs
