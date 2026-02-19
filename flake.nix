@@ -43,15 +43,21 @@
           targets = [ "wasm32-unknown-unknown" ];
         };
 
-        shell.packages = with pkgs; [
-          binaryen
-          cargo-leptos
-          leptosfmt
-          nodejs
-          playwright
-          pnpm
-          wasm-bindgen-cli
-        ];
+        shell = {
+          environment.RUSTFLAGS = ''--cfg getrandom_backend="wasm_js"'';
+          packages = with pkgs; [
+            bacon
+            binaryen
+            cargo-leptos
+            cargo-sort
+            leptosfmt
+            nodejs
+            playwright
+            pnpm
+            trunk
+            wasm-bindgen-cli
+          ];
+        };
       }
     );
 }
