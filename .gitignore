@@ -3,3 +3,6 @@ result
 
 # rust
 /target
+
+# trunk
+/dist
