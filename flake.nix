@@ -103,8 +103,7 @@
             installPhase = ''
               runHook preInstall
 
-              mkdir -p style
-              cp "${stylesheet}" style/main.css
+              cp "${stylesheet}" style.css
 
               trunk build --release --dist "$out"
 
