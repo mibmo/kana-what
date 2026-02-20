@@ -49,12 +49,13 @@
         pnpm = pkgs.pnpm_10;
         wasm-bindgen-cli = pkgs.wasm-bindgen-cli_0_2_100;
 
-        craneLib = (inputs.crane.mkLib pkgs).overrideToolchain (
+        toolchain =
           p:
           p.rust-bin.nightly.latest.default.override {
             inherit (config.rust) targets;
-          }
-        );
+          };
+
+        craneLib = (inputs.crane.mkLib pkgs).overrideToolchain toolchain;
 
         commonArgs = {
           inherit version;
@@ -199,12 +200,67 @@
           ];
         };
 
-        flake.packages.${system} = {
-          inherit
-            stylesheet
-            frontend
-            site-artifacts
-            ;
+        flake = {
+          packages.${system} = {
+            inherit
+              stylesheet
+              frontend
+              site-artifacts
+              ;
+          };
+          apps.${system}.watch =
+            let
+              app = pkgs.writeShellApplication {
+                name = "watch";
+                runtimeInputs = with pkgs; [
+                  (toolchain pkgs)
+                  bacon
+                  nodejs
+                  nodejs
+                  pnpm
+                  tmux
+                  trunk
+                  wasm-bindgen-cli
+                ];
+                text = ''
+                  socket_name="${project-name}-watch"
+                  session_name="${project-name}-watch"
+
+                  function _tmux() {
+                    tmux -L "$socket_name" "$@"
+                  }
+
+                  # shellcheck disable=SC2329
+                  function cleanup() {
+                    # kill tmux session if created
+                    if _tmux has-session -t "$session_name"; then _tmux kill-session -t "$session_name"; fi
+                  }
+
+                  trap 'cleanup' EXIT
+
+                  _tmux new-session -d -s "$session_name"
+
+                  # bacon
+                  _tmux new-window -t "$session_name" -n "bacon"
+                  _tmux send-keys -t "$session_name:bacon" "bacon" C-m
+
+                  # trunk
+                  _tmux new-window -t "$session_name" -n "trunk"
+                  _tmux send-keys -t "$session_name:trunk" "trunk serve --watch src --watch public --watch style.css" C-m
+
+                  # postcss
+                  _tmux new-window -t "$session_name" -n "postcss"
+                  _tmux send-keys -t "$session_name:postcss" "pnpm exec postcss style/main.css -o style.css --watch" C-m
+
+                  _tmux select-window -t "$session_name:bacon"
+                  _tmux attach-session -t "$session_name"
+                '';
+              };
+            in
+            {
+              type = "app";
+              program = lib.getExe app;
+            };
         };
       }
     );
