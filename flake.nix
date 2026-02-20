@@ -78,6 +78,7 @@
           }
         );
 
+        # @TODO: try `craneLib.buildTrunkPackage`
         frontend = craneLib.buildPackage (
           commonArgs
           // {
